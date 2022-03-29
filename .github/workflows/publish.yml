@@ -17,18 +17,18 @@ jobs:
         run: mvn test
 
       - name: Generate version
-        run: echo ::set-output name=tag::$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
+        run: echo ::set-output name=ver::$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
         id: project
 
       - name: Generate date
-        run: echo ::set-output name=value::$(date +'%Y%m%d.%H%M%S')
+        run: echo ::set-output name=valueDate::$(date +'%Y%m%d.%H%M%S')
         id: timestamp
 
       - name: Generate Docker image
         run: mvn spring-boot:build-image -DskipTests
-          -Dspring-boot.build-image.imageName=${{ secrets.DOCKERHUB_USERNAME }}/items:${{ steps.project.outputs.tag }}-${{ steps.timestamp.outputs.tag }}
+          -Dspring-boot.build-image.imageName=${{ secrets.DOCKERHUB_USERNAME }}/items:${{ steps.project.outputs.ver }}-${{ steps.timestamp.outputs.valueDate }}
 
       - name: Login to DockerHub
         run: docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}" 
       - name: Push image to DockerHub
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/items:${{ steps.project.outputs.tag }}-${{ steps.timestamp.outputs.tag }}
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/items:${{ steps.project.outputs.ver }}-${{ steps.timestamp.outputs.valueDate }}
